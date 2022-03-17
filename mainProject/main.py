@@ -1,7 +1,7 @@
-import threading
+"""import threading
 from time import time, sleep
 from threading import Thread, Lock
-import imdbGenreSpider
+import imdbGenreSpider"""
 
 
 if __name__ == '__main__':
