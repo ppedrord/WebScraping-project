@@ -7,8 +7,9 @@ import requests
 import numpy as np
 import random
 import time
+import threading
 
-start_time = time.time()
+start = time.time()
 
 
 class Counter:
@@ -35,14 +36,16 @@ def creating_targets():
     global advance_pages
 
     title_number = 1
-    page_url = f'{base_url}/search/title/?title_type=feature&genres=sport&start={title_number}&explore=genres&ref_=adv_nxt'
-    browser.get(page_url)
+    page_url    = f'{base_url}/search/title/?title_type=feature&genres=sport&start={title_number}&explore=genres&ref_=adv_nxt'
+    browser_url = browser.get(page_url)
     html = browser.page_source
     sport_genre = bs(html, "html.parser")
+
     number_of_titles = sport_genre.find('tbody').find('tr').find('td').text
     number_of_titles = re.findall("\d", number_of_titles)
     number_of_titles = ''.join(number_of_titles)
     number_of_titles = int(number_of_titles)
+
     advance_pages = list()
 
     while title_number < number_of_titles:
@@ -57,9 +60,15 @@ def creating_targets():
     return advance_pages
 
 
-creating_targets()
+pages = creating_targets()
 
+<<<<<<< HEAD
 """def divide_work(advance_pages, thread_id: int, thread_number: int):
+=======
+print(pages)
+
+def divide_work(advance_pages, thread_id: int, thread_number: int):
+>>>>>>> 8ac419b595d072d8e854ac4f4f532826c27ce9c8
     size = len(advance_pages)
 
     part = size / thread_number
@@ -147,12 +156,16 @@ print(sending_requests(advance_pages))
 """def finding_movie_data():
     global movies_list
     global cards
-    cards = sport_genre.find_all('div', {'class': 'lister-item mode-advanced'})
+
+    cards       = sport_genre.find_all('div', {'class': 'lister-item mode-advanced'})
+
     movies_list = list()
     h3_selector = sport_genre.find_all('h3', {'class': 'lister-item-header'})
-    p_selector = sport_genre.find_all('p', {'class': 'text-muted'})
+    p_selector  = sport_genre.find_all('p', {'class': 'text-muted'})
+
     num_p = 0
     num_p_synopsis = 1
+
     for i, card in enumerate(cards):
         movie_title = h3_selector[i].find('a').text
         title = movie_title
@@ -200,7 +213,9 @@ print(sending_requests(advance_pages))
             'genre': genre,
             'synopsis': synopsis
             }
+
         movies_list.append(movie_data)
+
         num_p += 2
         num_p_synopsis += 2
 
