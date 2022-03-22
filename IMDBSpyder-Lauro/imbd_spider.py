@@ -954,23 +954,28 @@ def get_urls_genre_short_film():
 def get_urls_genre_superhero():
     start = time.time()
     superhero_url = get_urls_all_genres()[20].get('url')
-    list_urls_superhero = [superhero_url]
+    list_urls_superhero = list()
     response = requests.get(superhero_url)
     superhero_genre = bs(response.text, "html.parser")
 
     # Finding how many pages this genre section has
-    number_of_titles = superhero_genre.find('tr').find('td').text
-    number_of_titles = re.findall("\d", number_of_titles)
+    number_of_titles = superhero_genre.find('div', {'class': 'desc'}).text
+    number_of_titles = re.findall("\d", number_of_titles)[3:]
     number_of_titles = ''.join(number_of_titles)
     number_of_titles = int(number_of_titles)
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=superhero&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in range(number_of_pages):
+            if title_number > number_of_titles:
+                break
+            page_url = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={i + 1}'
             list_urls_superhero.append(page_url)
             title_number += 50
+            if i == number_of_pages - 1:
+                last_page = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={number_of_pages}'
+                list_urls_superhero.append(last_page)
         else:
             target = superhero_url
             for i in range((number_of_pages - 1)):
@@ -981,12 +986,14 @@ def get_urls_genre_superhero():
                 list_urls_superhero.append(target)
 
     else:
-        while title_number < number_of_titles:
+        for i in range(number_of_pages):
             if title_number > number_of_titles:
                 break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=superhero&start={title_number}&explore=genres&ref_=adv_nxt'
+            page_url = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={i + 1}'
             list_urls_superhero.append(page_url)
             title_number += 50
+        last_page = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={number_of_pages}'
+        list_urls_superhero.append(last_page)
 
     print("get_urls_genre_superhero method:", time.time() - start)
 
@@ -1240,10 +1247,10 @@ def main():
     list_urls_genre_romance = create_list_urls("romance", get_urls_genre_romance())
     list_urls_genre_sci_fi = create_list_urls("sci_fi", get_urls_genre_sci_fi())
     # list_urls_genre_short_film = create_list_urls("short_film", get_urls_genre_short_film())
-    list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())
-    # list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())"""
-    list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
-    """list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
+    list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())"""
+    list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())
+    """list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
+    list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
     list_urls_genre_western = create_list_urls("western", get_urls_genre_western())"""
 
     """list_urls_action = get_urls_genre_action()
@@ -1265,10 +1272,10 @@ def main():
     list_urls_romance = get_urls_genre_romance()
     list_urls_sci_fi = get_urls_genre_sci_fi()
     # list_urls_short_film = get_urls_genre_short_film()
-    list_urls_sport = get_urls_genre_sport()
-    # list_urls_superhero = get_urls_genre_superhero()"""
-    list_urls_thriller = get_urls_genre_thriller()
-    """list_urls_war = get_urls_genre_war()
+    list_urls_sport = get_urls_genre_sport()"""
+    list_urls_superhero = get_urls_genre_superhero()
+    """list_urls_thriller = get_urls_genre_thriller()
+    list_urls_war = get_urls_genre_war()
     list_urls_western = get_urls_genre_western()"""
 
     """list_urls = list_urls_action
@@ -1290,10 +1297,10 @@ def main():
     list_urls.extend(list_urls_romance)
     list_urls.extend(list_urls_sci_fi)
     # list_urls.extend(list_urls_short_film)
-    list_urls.extend(list_urls_sport)
-    # list_urls.extend(list_urls_superhero)"""
-    list_urls = list_urls_thriller
-    """list_urls = list_urls_war
+    list_urls.extend(list_urls_sport)"""
+    list_urls = list_urls_superhero
+    """list_urls = list_urls_thriller
+    list_urls = list_urls_war
     list_urls.extend(list_urls_western)"""
     print(len(list_urls))
     list_threads = list()
