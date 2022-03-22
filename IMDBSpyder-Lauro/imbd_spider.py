@@ -10,6 +10,7 @@ import pickle
 import re
 from bs4 import BeautifulSoup as bs
 from threading import Thread
+import os
 
 
 ################################################################
@@ -62,7 +63,6 @@ def get_urls_all_genres():
             'url': genre_url
             }
         list_urls_all_genres.append(genre)
-        print(len(list_urls_all_genres) - 1, genre)
 
     return list_urls_all_genres
 
@@ -188,7 +188,6 @@ def get_urls_genre_action():
             list_urls_action.append(page_url)
             title_number += 50
 
-    print(list_urls_action)
     print("get_urls_genre_action method:", time.time() - start)
     return list_urls_action
 
@@ -229,7 +228,6 @@ def get_urls_genre_adventure():
             page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=adventure&start={title_number}&explore=genres&ref_=adv_nxt'
             list_urls_adventure.append(page_url)
             title_number += 50
-            print(title_number, page_url)
 
     print("get_urls_genre_adventure method:", time.time() - start)
 
@@ -272,7 +270,6 @@ def get_urls_genre_animation():
             page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=animation&start={title_number}&explore=genres&ref_=adv_nxt'
             list_urls_animation.append(page_url)
             title_number += 50
-            print(title_number, page_url)
 
     print("get_urls_genre_animation method:", time.time() - start)
 
@@ -1055,8 +1052,6 @@ def get_urls_genre_war():
     number_of_titles = ''.join(number_of_titles)
     number_of_titles = int(number_of_titles)
     number_of_pages = round(number_of_titles / 50)
-    print(number_of_titles)
-    print(number_of_pages)
 
     title_number = 51
     if number_of_titles > 10000:
@@ -1080,7 +1075,6 @@ def get_urls_genre_war():
             page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=genre-war&start={title_number}&explore=genres&ref_=adv_nxt'
             list_urls_genre_war.append(page_url)
             title_number += 50
-            print(page_url)
 
     print("get_urls_genre_genre_war method:", time.time() - start)
 
@@ -1212,11 +1206,27 @@ def clean_data(value: str):
 
 def execute(list_urls: list):
     list_movies = list()
-    for i in list_urls:
-        movies = make_request(i)
-        list_movies.extend(movies)
+    try:
+        for i in list_urls:
+            movies = make_request(i)
+            list_movies.extend(movies)
+            print(movies)
+        return list_movies
+    except:
+        return list_movies
 
-    return list_movies
+
+def load_files():
+    list_urls = list()
+    file_urls = "C:/Users/Pedro Paulo/WebScraping-project/IMDBSpyder-Lauro/list_urls_pages_all_genres/"
+    for file in os.listdir(file_urls):
+        if file.endswith(".p"):
+            pickle_file = open(os.path.join(file_urls, file), 'rb')
+            data = pickle.load(pickle_file)
+            list_urls.extend(data)
+
+    print(len(list_urls), list_urls[0])
+    return list_urls
 
 
 ################################################################
@@ -1225,16 +1235,15 @@ def execute(list_urls: list):
 
 def main():
     start = time.time()
-    list_urls = list()
     number_threads = int(sys.argv[1])
-
-    """list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
+    """
+    list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
     list_urls_genre_adventure = create_list_urls("adventure", get_urls_genre_adventure())
     list_urls_genre_animation = create_list_urls("animation", get_urls_genre_animation())
     list_urls_genre_biography = create_list_urls("biography", get_urls_genre_biography())
     list_urls_genre_comedy = create_list_urls("comedy", get_urls_genre_comedy())
     list_urls_genre_crime = create_list_urls("crime", get_urls_genre_crime())
-    list_urls_genre_documentary = create_list_urls("documentary", get_urls_genre_documentary())
+    # list_urls_genre_documentary = create_list_urls("documentary", get_urls_genre_documentary())
     list_urls_genre_drama = create_list_urls("drama", get_urls_genre_drama())
     list_urls_genre_family = create_list_urls("family", get_urls_genre_family())
     list_urls_genre_fantasy = create_list_urls("fantasy", get_urls_genre_fantasy())
@@ -1247,19 +1256,19 @@ def main():
     list_urls_genre_romance = create_list_urls("romance", get_urls_genre_romance())
     list_urls_genre_sci_fi = create_list_urls("sci_fi", get_urls_genre_sci_fi())
     # list_urls_genre_short_film = create_list_urls("short_film", get_urls_genre_short_film())
-    list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())"""
+    list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())
     list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())
-    """list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
+    list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
     list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
-    list_urls_genre_western = create_list_urls("western", get_urls_genre_western())"""
+    list_urls_genre_western = create_list_urls("western", get_urls_genre_western())
 
-    """list_urls_action = get_urls_genre_action()
+    list_urls_action = get_urls_genre_action()
     list_urls_adventure = get_urls_genre_adventure()
     list_urls_animation = get_urls_genre_animation()
     list_urls_biography = get_urls_genre_biography()
     list_urls_comedy = get_urls_genre_comedy()
     list_urls_crime = get_urls_genre_crime()
-    list_urls_documentary = get_urls_genre_documentary()
+    # list_urls_documentary = get_urls_genre_documentary()
     list_urls_drama = get_urls_genre_drama()
     list_urls_family = get_urls_genre_family()
     list_urls_fantasy = get_urls_genre_fantasy()
@@ -1272,13 +1281,13 @@ def main():
     list_urls_romance = get_urls_genre_romance()
     list_urls_sci_fi = get_urls_genre_sci_fi()
     # list_urls_short_film = get_urls_genre_short_film()
-    list_urls_sport = get_urls_genre_sport()"""
+    list_urls_sport = get_urls_genre_sport()
     list_urls_superhero = get_urls_genre_superhero()
-    """list_urls_thriller = get_urls_genre_thriller()
+    list_urls_thriller = get_urls_genre_thriller()
     list_urls_war = get_urls_genre_war()
-    list_urls_western = get_urls_genre_western()"""
+    list_urls_western = get_urls_genre_western()
 
-    """list_urls = list_urls_action
+    list_urls = list_urls_action
     list_urls.extend(list_urls_adventure)
     list_urls.extend(list_urls_animation)
     list_urls.extend(list_urls_biography)
@@ -1297,12 +1306,13 @@ def main():
     list_urls.extend(list_urls_romance)
     list_urls.extend(list_urls_sci_fi)
     # list_urls.extend(list_urls_short_film)
-    list_urls.extend(list_urls_sport)"""
-    list_urls = list_urls_superhero
-    """list_urls = list_urls_thriller
-    list_urls = list_urls_war
-    list_urls.extend(list_urls_western)"""
-    print(len(list_urls))
+    list_urls.extend(list_urls_sport)
+    list_urls.extend(list_urls_superhero)
+    list_urls.extend(list_urls_thriller)
+    list_urls.extend(list_urls_war)
+    list_urls.extend(list_urls_western)
+    print(len(list_urls))"""
+    list_urls = load_files()
     list_threads = list()
 
     for i in range(number_threads):
