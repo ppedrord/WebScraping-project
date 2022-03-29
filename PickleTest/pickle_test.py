@@ -1,10 +1,38 @@
 import pickle
+import json
 
-with open('list_urls_superhero.p', 'rb') as file:
-    list = pickle.load(file)
+with open('movies.p', 'rb') as file:
+    object = pickle.load(file)
 
-print(len(list))
-print(list[25])
+dictionary = {
+    'movies_limited_all': object
+    }
+print(type(object))
+print(type(dictionary))
+
+# Serializing json
+json_object = json.dumps(dictionary, indent=4)
+
+# Writing to sample.json
+with open("sample.json", "w") as outfile:
+    outfile.write(json_object)
+
+
+
+"""list_individual_links = list()
+individual_links_file = open("individual_links_file.p", "wb")
+for i, v in enumerate(object):
+    list_individual_links.append(object[i]['link'])
+
+print(len(list_individual_links))
+list_individual_links = list(set(list_individual_links))
+print(len(list_individual_links))
+individual_links_file = open("individual_links_file.p", "wb")
+pickle.dump(list_individual_links, individual_links_file)
+individual_links_file.close()
+"""
+# for i in list_urls:
+#     print(i)
 
 """
     list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
@@ -82,4 +110,3 @@ print(list[25])
     list_urls.extend(list_urls_war)
     list_urls.extend(list_urls_western)
     print(len(list_urls))"""
-

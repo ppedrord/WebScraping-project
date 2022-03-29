@@ -11,11 +11,14 @@ import re
 from bs4 import BeautifulSoup as bs
 from threading import Thread
 import os
+import random
+import numpy as np
 
 
 ################################################################
 # Threading
 ################################################################
+
 
 def divide_work(list_urls, thread_id: int, thread_number: int):
     size = len(list_urls)
@@ -67,90 +70,6 @@ def get_urls_all_genres():
     return list_urls_all_genres
 
 
-def get_urls_genre_sport():
-    start = time.time()
-    sport_url = get_urls_all_genres()[19].get('url')
-    list_urls_sport = [sport_url]
-    response = requests.get(sport_url)
-    sport_genre = bs(response.text, "html.parser")
-
-    # Finding how many pages this genre section has
-    number_of_titles = sport_genre.find('tr').find('td').text
-    number_of_titles = re.findall("\d", number_of_titles)
-    number_of_titles = ''.join(number_of_titles)
-    number_of_titles = int(number_of_titles)
-    number_of_pages = round(number_of_titles / 50)
-
-    title_number = 51
-    if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sport&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_sport.append(page_url)
-            title_number += 50
-        else:
-            target = sport_url
-            for i in range((number_of_pages - 1)):
-                next_response = requests.get(target)
-                sport_genre_pages = bs(next_response.text, "html.parser")
-                next_href = sport_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
-                target = f"https://www.imdb.com{next_href}"
-                list_urls_sport.append(target)
-
-    else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sport&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_sport.append(page_url)
-            title_number += 50
-
-    print("get_urls_genre_sport method:", time.time() - start)
-
-    return list_urls_sport
-
-
-def get_urls_genre_western():
-    start = time.time()
-    western_url = get_urls_all_genres()[23].get('url')
-    list_urls_western = [western_url]
-    response = requests.get(western_url)
-    western_genre = bs(response.text, "html.parser")
-
-    # Finding how many pages this genre section has
-    number_of_titles = western_genre.find('tr').find('td').text
-    number_of_titles = re.findall("\d", number_of_titles)
-    number_of_titles = ''.join(number_of_titles)
-    number_of_titles = int(number_of_titles)
-    number_of_pages = round(number_of_titles / 50)
-
-    title_number = 51
-    if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=western&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_western.append(page_url)
-            title_number += 50
-        else:
-            target = western_url
-            for i in range((number_of_pages - 1)):
-                next_response = requests.get(target)
-                western_genre_pages = bs(next_response.text, "html.parser")
-                next_href = western_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
-                target = f"https://www.imdb.com{next_href}"
-                list_urls_western.append(target)
-
-    else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=western&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_western.append(page_url)
-            title_number += 50
-
-    print("get_urls_genre_western method:", time.time() - start)
-
-    return list_urls_western
-
-
 def get_urls_genre_action():
     start = time.time()
     action_url = get_urls_all_genres()[0].get('url')
@@ -166,27 +85,43 @@ def get_urls_genre_action():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=action&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=action&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_action.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
         else:
-            target = action_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=action&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 action_genre_pages = bs(next_response.text, "html.parser")
-                next_href = action_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if action_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = action_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_action.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=action&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=action&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_action.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_action method:", time.time() - start)
     return list_urls_action
@@ -207,27 +142,41 @@ def get_urls_genre_adventure():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=adventure&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=adventure&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_adventure.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = adventure_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=adventure&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 adventure_genre_pages = bs(next_response.text, "html.parser")
-                next_href = adventure_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if adventure_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = adventure_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_adventure.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=adventure&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=adventure&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_adventure.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_adventure method:", time.time() - start)
 
@@ -249,27 +198,41 @@ def get_urls_genre_animation():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=animation&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=animation&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_animation.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = animation_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=animation&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 animation_genre_pages = bs(next_response.text, "html.parser")
-                next_href = animation_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if animation_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = animation_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_animation.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=animation&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=animation&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_animation.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_animation method:", time.time() - start)
 
@@ -291,27 +254,41 @@ def get_urls_genre_comedy():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=comedy&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=comedy&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_comedy.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = comedy_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=comedy&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 comedy_genre_pages = bs(next_response.text, "html.parser")
-                next_href = comedy_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if comedy_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = comedy_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_comedy.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=comedy&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=comedy&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_comedy.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_comedy method:", time.time() - start)
 
@@ -333,27 +310,41 @@ def get_urls_genre_biography():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=biography&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=biography&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_biography.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = biography_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=biography&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 biography_genre_pages = bs(next_response.text, "html.parser")
-                next_href = biography_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if biography_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = biography_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_biography.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=biography&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=biography&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_biography.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_biography method:", time.time() - start)
 
@@ -375,73 +366,45 @@ def get_urls_genre_crime():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=crime&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=crime&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_crime.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = crime_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=crime&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 crime_genre_pages = bs(next_response.text, "html.parser")
-                next_href = crime_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if crime_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = crime_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_crime.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=crime&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=crime&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_crime.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_crime method:", time.time() - start)
 
     return list_urls_crime
-
-
-def get_urls_genre_documentary():
-    start = time.time()
-    documentary_url = get_urls_all_genres()[6].get('url')
-    list_urls_documentary = [documentary_url]
-    response = requests.get(documentary_url)
-    documentary_genre = bs(response.text, "html.parser")
-
-    # Finding how many pages this genre section has
-    number_of_titles = documentary_genre.find('tr').find('td').text
-    number_of_titles = re.findall("\d", number_of_titles)
-    number_of_titles = ''.join(number_of_titles)
-    number_of_titles = int(number_of_titles)
-    number_of_pages = round(number_of_titles / 50)
-
-    title_number = 51
-    if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=documentary&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_documentary.append(page_url)
-            title_number += 50
-        else:
-            target = documentary_url
-            for i in range((number_of_pages - 1)):
-                next_response = requests.get(target)
-                documentary_genre_pages = bs(next_response.text, "html.parser")
-                next_href = documentary_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
-                target = f"https://www.imdb.com{next_href}"
-                list_urls_documentary.append(target)
-
-    else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=documentary&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_documentary.append(page_url)
-            title_number += 50
-
-    print("get_urls_genre_documentary method:", time.time() - start)
-
-    return list_urls_documentary
 
 
 def get_urls_genre_drama():
@@ -459,27 +422,41 @@ def get_urls_genre_drama():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=drama&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=drama&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_drama.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = drama_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=drama&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 drama_genre_pages = bs(next_response.text, "html.parser")
-                next_href = drama_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if drama_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = drama_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_drama.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=drama&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=drama&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_drama.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_drama method:", time.time() - start)
 
@@ -501,27 +478,41 @@ def get_urls_genre_family():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=family&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=family&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_family.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = family_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=family&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 family_genre_pages = bs(next_response.text, "html.parser")
-                next_href = family_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if family_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = family_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_family.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=family&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=family&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_family.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_family method:", time.time() - start)
 
@@ -543,27 +534,41 @@ def get_urls_genre_fantasy():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=fantasy&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=fantasy&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_fantasy.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = fantasy_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=fantasy&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 fantasy_genre_pages = bs(next_response.text, "html.parser")
-                next_href = fantasy_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if fantasy_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = fantasy_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_fantasy.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=fantasy&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=fantasy&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_fantasy.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_fantasy method:", time.time() - start)
 
@@ -585,27 +590,41 @@ def get_urls_genre_film_noir():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=film-noir&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=film-noir&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_film_noir.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = film_noir_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=film-noir&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 film_noir_genre_pages = bs(next_response.text, "html.parser")
-                next_href = film_noir_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if film_noir_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = film_noir_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_film_noir.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=film-noir&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=film-noir&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_film_noir.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_film_noir method:", time.time() - start)
 
@@ -627,27 +646,41 @@ def get_urls_genre_history():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=history&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=history&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_history.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = history_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=history&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 history_genre_pages = bs(next_response.text, "html.parser")
-                next_href = history_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if history_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = history_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_history.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=history&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=history&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_history.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_history method:", time.time() - start)
 
@@ -669,27 +702,41 @@ def get_urls_genre_horror():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=horror&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=horror&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_horror.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = horror_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=horror&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 horror_genre_pages = bs(next_response.text, "html.parser")
-                next_href = horror_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if horror_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = horror_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_horror.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=horror&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=horror&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_horror.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_horror method:", time.time() - start)
 
@@ -711,27 +758,41 @@ def get_urls_genre_music():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=music&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=music&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_music.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = music_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=music&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 music_genre_pages = bs(next_response.text, "html.parser")
-                next_href = music_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if music_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = music_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_music.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=music&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=music&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_music.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_music method:", time.time() - start)
 
@@ -753,27 +814,41 @@ def get_urls_genre_musical():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=musical&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=musical&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_musical.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = musical_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=musical&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 musical_genre_pages = bs(next_response.text, "html.parser")
-                next_href = musical_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if musical_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = musical_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_musical.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=musical&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=musical&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_musical.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_musical method:", time.time() - start)
 
@@ -795,27 +870,41 @@ def get_urls_genre_mystery():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=mystery&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=mystery&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_mystery.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = mystery_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=mystery&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 mystery_genre_pages = bs(next_response.text, "html.parser")
-                next_href = mystery_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if mystery_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = mystery_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_mystery.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=mystery&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=mystery&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_mystery.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_mystery method:", time.time() - start)
 
@@ -837,27 +926,41 @@ def get_urls_genre_romance():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=romance&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=romance&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_romance.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = romance_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=romance&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 romance_genre_pages = bs(next_response.text, "html.parser")
-                next_href = romance_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if romance_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = romance_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_romance.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=romance&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=romance&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_romance.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_romance method:", time.time() - start)
 
@@ -879,73 +982,101 @@ def get_urls_genre_sci_fi():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sci-fi&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sci-fi&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_sci_fi.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = sci_fi_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=sci-fi&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 sci_fi_genre_pages = bs(next_response.text, "html.parser")
-                next_href = sci_fi_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if sci_fi_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = sci_fi_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_sci_fi.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sci-fi&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sci-fi&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_sci_fi.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_sci_fi method:", time.time() - start)
 
     return list_urls_sci_fi
 
 
-def get_urls_genre_short_film():
+def get_urls_genre_sport():
     start = time.time()
-    short_film_url = get_urls_all_genres()[18].get('url')
-    list_urls_short_film = [short_film_url]
-    response = requests.get(short_film_url)
-    short_film_genre = bs(response.text, "html.parser")
+    sport_url = get_urls_all_genres()[19].get('url')
+    list_urls_sport = [sport_url]
+    response = requests.get(sport_url)
+    sport_genre = bs(response.text, "html.parser")
 
     # Finding how many pages this genre section has
-    number_of_titles = short_film_genre.find('tr').find('td').text
+    number_of_titles = sport_genre.find('tr').find('td').text
     number_of_titles = re.findall("\d", number_of_titles)
     number_of_titles = ''.join(number_of_titles)
     number_of_titles = int(number_of_titles)
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=short&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_short_film.append(page_url)
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sport&start={i}&explore=genres&ref_=adv_nxt'
+            list_urls_sport.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = short_film_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=sport&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
-                short_film_genre_pages = bs(next_response.text, "html.parser")
-                next_href = short_film_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                sport_genre_pages = bs(next_response.text, "html.parser")
+                if sport_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = sport_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
-                list_urls_short_film.append(target)
+                list_urls_sport.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=short&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_short_film.append(page_url)
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=sport&start={i}&explore=genres&ref_=adv_nxt'
+            list_urls_sport.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
-    print("get_urls_genre_short_film method:", time.time() - start)
+    print("get_urls_genre_sport method:", time.time() - start)
 
-    return list_urls_short_film
+    return list_urls_sport
 
 
 def get_urls_genre_superhero():
@@ -962,35 +1093,11 @@ def get_urls_genre_superhero():
     number_of_titles = int(number_of_titles)
     number_of_pages = round(number_of_titles / 50)
 
-    title_number = 51
-    if number_of_titles > 10000:
-        for i in range(number_of_pages):
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={i + 1}'
-            list_urls_superhero.append(page_url)
-            title_number += 50
-            if i == number_of_pages - 1:
-                last_page = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={number_of_pages}'
-                list_urls_superhero.append(last_page)
-        else:
-            target = superhero_url
-            for i in range((number_of_pages - 1)):
-                next_response = requests.get(target)
-                superhero_genre_pages = bs(next_response.text, "html.parser")
-                next_href = superhero_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
-                target = f"https://www.imdb.com{next_href}"
-                list_urls_superhero.append(target)
-
-    else:
-        for i in range(number_of_pages):
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={i + 1}'
-            list_urls_superhero.append(page_url)
-            title_number += 50
-        last_page = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=T1Q8CSME92J5EA9KD18E&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={number_of_pages}'
-        list_urls_superhero.append(last_page)
+    for i in range(1, number_of_pages):
+        page_url = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=H4VXCWTS2K33NAVXMQ7V&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={i}'
+        list_urls_superhero.append(page_url)
+    last_page = f'https://www.imdb.com/search/keyword/?keywords=superhero&title_type=movie&pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=facfbd0c-6f3d-4c05-9348-22eebd58852e&pf_rd_r=H4VXCWTS2K33NAVXMQ7V&pf_rd_s=center-6&pf_rd_t=15051&pf_rd_i=genre&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page={number_of_pages}'
+    list_urls_superhero.append(last_page)
 
     print("get_urls_genre_superhero method:", time.time() - start)
 
@@ -1012,27 +1119,41 @@ def get_urls_genre_thriller():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=thriller&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=thriller&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_thriller.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = thriller_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=thriller&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
                 thriller_genre_pages = bs(next_response.text, "html.parser")
-                next_href = thriller_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                if thriller_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = thriller_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
                 list_urls_thriller.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=thriller&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=thriller&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_thriller.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_thriller method:", time.time() - start)
 
@@ -1054,31 +1175,114 @@ def get_urls_genre_war():
     number_of_pages = round(number_of_titles / 50)
 
     title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
     if number_of_titles > 10000:
-        while title_number < number_of_titles:
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=genre-war&start={title_number}&explore=genres&ref_=adv_nxt'
-            list_urls_genre_war.append(page_url)
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=war&start={i}&explore=genres&ref_=adv_nxt'
+            list_urls_war.append(page_url)
             title_number += 50
+            print(page_url)
         else:
-            target = genre_war_url
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=war&start={9951}&explore=genres&ref_=adv_nxt'
             for i in range((number_of_pages - 1)):
                 next_response = requests.get(target)
-                genre_war_genre_pages = bs(next_response.text, "html.parser")
-                next_href = genre_war_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                war_genre_pages = bs(next_response.text, "html.parser")
+                if war_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = war_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
                 target = f"https://www.imdb.com{next_href}"
-                list_urls_genre_war.append(target)
+                list_urls_war.append(target)
+                print(target)
 
     else:
-        while title_number < number_of_titles:
-            if title_number > number_of_titles:
-                break
-            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=genre-war&start={title_number}&explore=genres&ref_=adv_nxt'
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=war&start={i}&explore=genres&ref_=adv_nxt'
             list_urls_genre_war.append(page_url)
             title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
 
     print("get_urls_genre_genre_war method:", time.time() - start)
 
     return list_urls_genre_war
+
+
+def get_urls_genre_western():
+    start = time.time()
+    western_url = get_urls_all_genres()[23].get('url')
+    list_urls_western = [western_url]
+    response = requests.get(western_url)
+    western_genre = bs(response.text, "html.parser")
+
+    # Finding how many pages this genre section has
+    number_of_titles = western_genre.find('tr').find('td').text
+    number_of_titles = re.findall("\d", number_of_titles)
+    number_of_titles = ''.join(number_of_titles)
+    number_of_titles = int(number_of_titles)
+    number_of_pages = round(number_of_titles / 50)
+
+    title_number = 51
+    list_title_number = list()
+    for i in range(10000):
+        list_title_number.append(title_number)
+        title_number += 50
+        if title_number > 10000:
+            break
+    print(list_title_number)
+
+    if number_of_titles > 10000:
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=western&start={i}&explore=genres&ref_=adv_nxt'
+            list_urls_western.append(page_url)
+            title_number += 50
+            print(page_url)
+        else:
+            target = f'https://www.imdb.com/search/title/?title_type=feature&genres=western&start={9951}&explore=genres&ref_=adv_nxt'
+            for i in range((number_of_pages - 1)):
+                next_response = requests.get(target)
+                western_genre_pages = bs(next_response.text, "html.parser")
+                if western_genre_pages.find('a', {'class': 'lister-page-next next-page'}) is not None:
+                    next_href = western_genre_pages.find('a', {'class': 'lister-page-next next-page'}).get('href')
+                else:
+                    break
+                target = f"https://www.imdb.com{next_href}"
+                list_urls_western.append(target)
+                print(target)
+
+    else:
+        for i in list_title_number:
+            page_url = f'https://www.imdb.com/search/title/?title_type=feature&genres=western&start={i}&explore=genres&ref_=adv_nxt'
+            list_urls_western.append(page_url)
+            title_number += 50
+            print(page_url)
+            if i > number_of_titles:
+                break
+
+    print("get_urls_genre_western method:", time.time() - start)
+
+    return list_urls_western
+
+
+def load_files():
+    list_urls = list()
+    file_urls = "C:/Users/Pedro Paulo/WebScraping-project/IMDBSpyder-Lauro/list_urls_pages_all_genres/"
+    for file in os.listdir(file_urls):
+        if file.endswith(".p"):
+            pickle_file = open(os.path.join(file_urls, file), 'rb')
+            data = pickle.load(pickle_file)
+            list_urls.extend(data)
+
+    print(len(list_urls), list_urls[0])
+    return list_urls
 
 
 def create_list_urls(name_genre: str, list_urls: list):
@@ -1088,13 +1292,74 @@ def create_list_urls(name_genre: str, list_urls: list):
     return file
 
 
-def make_request(url):
+def execute(list_urls: list):
+    urls_accepted = list()
+    urls_rejected = list()
+    list_movies = list()
+
+    for i in list_urls:
+        try:
+            print('try:')
+            delays = [1, 2, 3]
+            movies = select_user_agent(i, delays)
+            list_movies.extend(movies)
+            urls_accepted.append(i)
+        except:
+            print('except:')
+            bigger_delays = [180, 240, 300]
+            movies = select_user_agent(i, bigger_delays)
+            if type(movies) is not None:
+                urls_accepted.append(i)
+                list_movies.extend(movies)
+            else:
+                urls_rejected.append(i)
+
+    urls_accepted_file = open("urls_accepted.p", "wb")
+    pickle.dump(urls_accepted, urls_accepted_file)
+    urls_accepted_file.close()
+
+    urls_rejected_file = open("urls_rejected.p", "wb")
+    pickle.dump(urls_rejected, urls_rejected_file)
+    urls_rejected_file.close()
+
+    return list_movies
+
+
+def select_user_agent(url: str, delays=[1, 2, 3]):
+    user_agent_list = [
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+        ]
+    delay = np.random.choice(delays)
+    time.sleep(delay)
+
+    # Pick a random user agent
+    user_agent = random.choice(user_agent_list)
+    # Set the headers
+    headers = {'User-Agent': user_agent}
+
+    # Make the request
+    response = requests.get(url, headers=headers)
+    print(response)
+    movies = parse_data(response.text)
+    print(movies)
+
+    if response.status_code == 200:
+        return movies
+    else:
+        return None
+
+
+"""def make_request(url):
     try:
         response = requests.get(url)
         movies = parse_data(response.text)
         return movies
     except:
-        return None
+        return None"""
 
 
 def parse_data(html_page: str):
@@ -1104,7 +1369,7 @@ def parse_data(html_page: str):
 
     h3_selector = parser.find_all('h3', {'class': 'lister-item-header'})
     p_selector = parser.find_all('p', {'class': 'text-muted'})
-    # list_content_selector = parser.find_all('div', {'class': 'lister-item-content'})
+    list_content_selector = parser.find_all('div', {'class': 'lister-item-content'})
 
     num_p = 0
     num_p_synopsis = 1
@@ -1153,28 +1418,48 @@ def parse_data(html_page: str):
 
         synopsis = movie_synopsis
 
-        """span_selector = list_content_selector[i].find('p', {'class': 'sort-num_votes-visible'})
-        if span_selector[0] is None:
-            movie_num_votes = "Isn't Available"
+        span_selector = list_content_selector[i].find('p', {'class': 'sort-num_votes-visible'})
+        if span_selector is not None:
+            if span_selector.find('span', {'name': 'nv'}) is False:
+                movie_num_votes = "Isn't Available"
+            elif span_selector.find('span', {'name': 'nv'}) is not None:
+                movie_num_votes = span_selector.find('span', {'name': 'nv'}).get('data-value')
+            else:
+                movie_num_votes = "Isn't Available"
         else:
-            movie_num_votes = span_selector.find_all('span', {'name': 'nv'})[0].text
+            movie_num_votes = "Isn't Available"
+
 
         num_votes = movie_num_votes
 
-        if span_selector[1] is False:
-            movie_collection = "Isn't Available"
+        if span_selector is not None and len(span_selector.find_all('span', {'name': 'nv'})) > 1:
+            if span_selector.find_all('span', {'name': 'nv'})[1] is False:
+                movie_collection = "Isn't Available"
+            else:
+                movie_collection = span_selector.find_all('span', {'name': 'nv'})[1].get('data-value')
         else:
-            movie_collection = span_selector.find_all('span', {'name': 'nv'})[1].text
+            movie_collection = "Isn't Available"
 
-        collection = movie_collection
+        if type(movie_collection) is None:
+            collection = "Isn't Available"
+        else:
+            collection = movie_collection
+            # collection = re.findall("\d", collection)
+            # collection = ''.join(collection)
+
 
         if list_content_selector[i].find('div', {'class': 'ratings-bar'}) is None:
             movie_imdb_rating = "Isn't Available"
         else:
             rating_bars_selector = list_content_selector[i].find('div', {'class': 'ratings-bar'})
-            movie_imdb_rating = rating_bars_selector.find('div', {'class': 'inline-block ratings-imdb-rating'}).get('data-value')
-
-        imdb_rating = movie_imdb_rating"""
+            if rating_bars_selector.find('div', {'class': 'inline-block ratings-imdb-rating'}) is not None:
+                movie_imdb_rating = rating_bars_selector.find('div', {'class': 'inline-block ratings-imdb-rating'}).get('data-value')
+            else:
+                movie_imdb_rating = "Isn't Available"
+        if type(movie_imdb_rating) is None:
+            imdb_rating = "Isn't Available"
+        else:
+            imdb_rating = movie_imdb_rating
 
         movie_data = {
             'title': clean_data(title),
@@ -1183,9 +1468,9 @@ def parse_data(html_page: str):
             'runtime': clean_data(runtime),
             'genre': clean_data(genre),
             'synopsis': clean_data(synopsis),
-            # 'imdb_rating': imdb_rating,
-            # 'num_votes': num_votes,
-            # 'collection': collection,
+            'imdb_rating': imdb_rating,
+            'num_votes': num_votes,
+            'collection': collection,
             'link': f"https://www.imdb.com{movie_url}"
             }
 
@@ -1204,31 +1489,6 @@ def clean_data(value: str):
     return new_value
 
 
-def execute(list_urls: list):
-    list_movies = list()
-    try:
-        for i in list_urls:
-            movies = make_request(i)
-            list_movies.extend(movies)
-            print(movies)
-        return list_movies
-    except:
-        return list_movies
-
-
-def load_files():
-    list_urls = list()
-    file_urls = "C:/Users/Pedro Paulo/WebScraping-project/IMDBSpyder-Lauro/list_urls_pages_all_genres/"
-    for file in os.listdir(file_urls):
-        if file.endswith(".p"):
-            pickle_file = open(os.path.join(file_urls, file), 'rb')
-            data = pickle.load(pickle_file)
-            list_urls.extend(data)
-
-    print(len(list_urls), list_urls[0])
-    return list_urls
-
-
 ################################################################
 # Main
 ################################################################
@@ -1236,84 +1496,39 @@ def load_files():
 def main():
     start = time.time()
     number_threads = int(sys.argv[1])
-    """
-    list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
-    list_urls_genre_adventure = create_list_urls("adventure", get_urls_genre_adventure())
-    list_urls_genre_animation = create_list_urls("animation", get_urls_genre_animation())
-    list_urls_genre_biography = create_list_urls("biography", get_urls_genre_biography())
-    list_urls_genre_comedy = create_list_urls("comedy", get_urls_genre_comedy())
-    list_urls_genre_crime = create_list_urls("crime", get_urls_genre_crime())
-    # list_urls_genre_documentary = create_list_urls("documentary", get_urls_genre_documentary())
-    list_urls_genre_drama = create_list_urls("drama", get_urls_genre_drama())
-    list_urls_genre_family = create_list_urls("family", get_urls_genre_family())
-    list_urls_genre_fantasy = create_list_urls("fantasy", get_urls_genre_fantasy())
-    list_urls_genre_film_noir = create_list_urls("film_noir", get_urls_genre_film_noir())
-    list_urls_genre_history = create_list_urls("history", get_urls_genre_history())
-    list_urls_genre_horror = create_list_urls("horror", get_urls_genre_horror())
-    list_urls_genre_music = create_list_urls("music", get_urls_genre_music())
-    list_urls_genre_musical = create_list_urls("musical", get_urls_genre_musical())
-    list_urls_genre_mystery = create_list_urls("mystery", get_urls_genre_mystery())
-    list_urls_genre_romance = create_list_urls("romance", get_urls_genre_romance())
-    list_urls_genre_sci_fi = create_list_urls("sci_fi", get_urls_genre_sci_fi())
-    # list_urls_genre_short_film = create_list_urls("short_film", get_urls_genre_short_film())
-    list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())
-    list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())
-    list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
-    list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
-    list_urls_genre_western = create_list_urls("western", get_urls_genre_western())
 
-    list_urls_action = get_urls_genre_action()
-    list_urls_adventure = get_urls_genre_adventure()
-    list_urls_animation = get_urls_genre_animation()
-    list_urls_biography = get_urls_genre_biography()
-    list_urls_comedy = get_urls_genre_comedy()
-    list_urls_crime = get_urls_genre_crime()
-    # list_urls_documentary = get_urls_genre_documentary()
-    list_urls_drama = get_urls_genre_drama()
-    list_urls_family = get_urls_genre_family()
-    list_urls_fantasy = get_urls_genre_fantasy()
-    list_urls_film_noir = get_urls_genre_film_noir()
-    list_urls_history = get_urls_genre_history()
-    list_urls_horror = get_urls_genre_horror()
-    list_urls_music = get_urls_genre_music()
-    list_urls_musical = get_urls_genre_musical()
-    list_urls_mystery = get_urls_genre_mystery()
-    list_urls_romance = get_urls_genre_romance()
-    list_urls_sci_fi = get_urls_genre_sci_fi()
-    # list_urls_short_film = get_urls_genre_short_film()
-    list_urls_sport = get_urls_genre_sport()
-    list_urls_superhero = get_urls_genre_superhero()
-    list_urls_thriller = get_urls_genre_thriller()
-    list_urls_war = get_urls_genre_war()
-    list_urls_western = get_urls_genre_western()
+    # list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
+    # list_urls_genre_adventure = create_list_urls("adventure", get_urls_genre_adventure())
+    # list_urls_genre_animation = create_list_urls("animation", get_urls_genre_animation())
+    # list_urls_genre_biography = create_list_urls("biography", get_urls_genre_biography())
+    # list_urls_genre_comedy = create_list_urls("comedy", get_urls_genre_comedy())
+    # list_urls_genre_crime = create_list_urls("crime", get_urls_genre_crime())
+    # list_urls_genre_drama = create_list_urls("drama", get_urls_genre_drama())
+    # list_urls_genre_family = create_list_urls("family", get_urls_genre_family())
+    # list_urls_genre_fantasy = create_list_urls("fantasy", get_urls_genre_fantasy())
+    # list_urls_genre_film_noir = create_list_urls("film_noir", get_urls_genre_film_noir())
+    # list_urls_genre_history = create_list_urls("history", get_urls_genre_history())
+    # list_urls_genre_horror = create_list_urls("horror", get_urls_genre_horror())
+    # list_urls_genre_music = create_list_urls("music", get_urls_genre_music())
+    # list_urls_genre_musical = create_list_urls("musical", get_urls_genre_musical())
+    # list_urls_genre_mystery = create_list_urls("mystery", get_urls_genre_mystery())
+    # list_urls_genre_romance = create_list_urls("romance", get_urls_genre_romance())
+    # list_urls_genre_sci_fi = create_list_urls("sci_fi", get_urls_genre_sci_fi())
+    # list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())
+    # list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())
+    # list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
+    # list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
+    # list_urls_genre_western = create_list_urls("western", get_urls_genre_western())
 
-    list_urls = list_urls_action
-    list_urls.extend(list_urls_adventure)
-    list_urls.extend(list_urls_animation)
-    list_urls.extend(list_urls_biography)
-    list_urls.extend(list_urls_comedy)
-    list_urls.extend(list_urls_crime)
-    list_urls.extend(list_urls_documentary)
-    list_urls.extend(list_urls_drama)
-    list_urls.extend(list_urls_family)
-    list_urls.extend(list_urls_fantasy)
-    list_urls.extend(list_urls_film_noir)
-    list_urls.extend(list_urls_history)
-    list_urls.extend(list_urls_horror)
-    list_urls.extend(list_urls_music)
-    list_urls.extend(list_urls_musical)
-    list_urls.extend(list_urls_mystery)
-    list_urls.extend(list_urls_romance)
-    list_urls.extend(list_urls_sci_fi)
-    # list_urls.extend(list_urls_short_film)
-    list_urls.extend(list_urls_sport)
-    list_urls.extend(list_urls_superhero)
-    list_urls.extend(list_urls_thriller)
-    list_urls.extend(list_urls_war)
-    list_urls.extend(list_urls_western)
-    print(len(list_urls))"""
-    list_urls = load_files()
+    list_all_urls = load_files()
+    all_urls_file = open("all_urls_file.p", "wb")
+    pickle.dump(list_all_urls, all_urls_file)
+    all_urls_file.close()
+
     list_threads = list()
+
+    with open('all_urls_file.p', 'rb') as all_urls:
+        list_urls = pickle.load(all_urls)
 
     for i in range(number_threads):
         sub_list_urls = divide_work(list_urls, i, number_threads)
@@ -1329,12 +1544,15 @@ def main():
     # Merging lists
     list_movies = list()
     for i in list_threads:
-        list_movies.extend(i.movies)
+        try:
+            list_movies.extend(i.movies)
+        except:
+            print("None type is not iterable")
+        print(len(list_movies))
 
     file = open("movies.p", "wb")
     pickle.dump(list_movies, file)
     file.close()
-    print(list_movies)
     print("main method:", time.time() - start)
 
 
