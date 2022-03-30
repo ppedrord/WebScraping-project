@@ -1308,7 +1308,7 @@ def execute(list_urls: list):
             print('except:')
             bigger_delays = [180, 240, 300]
             movies = select_user_agent(i, bigger_delays)
-            if type(movies) is not None:
+            if movies is not None:
                 urls_accepted.append(i)
                 list_movies.extend(movies)
             else:
@@ -1440,13 +1440,12 @@ def parse_data(html_page: str):
         else:
             movie_collection = "Isn't Available"
 
-        if type(movie_collection) is None:
-            collection = "Isn't Available"
+        if movie_collection != "Isn't Available":
+            collection = movie_collection
+            collection = re.findall("\d", collection)
+            collection = ''.join(collection)
         else:
             collection = movie_collection
-            # collection = re.findall("\d", collection)
-            # collection = ''.join(collection)
-
 
         if list_content_selector[i].find('div', {'class': 'ratings-bar'}) is None:
             movie_imdb_rating = "Isn't Available"

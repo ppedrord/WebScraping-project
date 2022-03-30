@@ -12,15 +12,18 @@ import numpy as np
 with open('all_urls_file.p', 'rb') as all_urls_file:
     list_urls = pickle.load(all_urls_file)
 
-small_list = list_urls[0:10]
+small_list = list_urls[0:100]
 
 
 def execute():
+    start = time.time()
+    movies_list = list()
     for i in small_list:
         movie_data = parse_data(i)
+        movies_list.extend(movie_data)
         print(movie_data)
-
-    return movie_data
+    print("main method:", time.time() - start)
+    return movies_list
 
 
 def parse_data(url: str):
@@ -99,9 +102,13 @@ def parse_data(url: str):
         else:
             movie_collection = "Isn't Available"
 
-        collection = movie_collection
-        collection = re.findall("\d", collection)
-        collection = ''.join(collection)
+        if movie_collection != "Isn't Available":
+            collection = movie_collection
+            collection = re.findall("\d", collection)
+            collection = ''.join(collection)
+        else:
+            collection = movie_collection
+
 
         if list_content_selector[i].find('div', {'class': 'ratings-bar'}) is None:
             movie_imdb_rating = "Isn't Available"
