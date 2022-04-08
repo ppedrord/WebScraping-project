@@ -1325,7 +1325,7 @@ def execute(list_urls: list):
     return list_movies
 
 
-def select_user_agent(url: str, delays=[1, 2, 3]):
+def select_user_agent(url: str, delays):
     user_agent_list = [
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
@@ -1337,7 +1337,7 @@ def select_user_agent(url: str, delays=[1, 2, 3]):
     time.sleep(delay)
 
     # Pick a random user agent
-    user_agent = random.choice(user_agent_list)
+    user_agent = np.random.choice(user_agent_list)
     # Set the headers
     headers = {'User-Agent': user_agent}
 
@@ -1351,15 +1351,6 @@ def select_user_agent(url: str, delays=[1, 2, 3]):
         return movies
     else:
         return None
-
-
-"""def make_request(url):
-    try:
-        response = requests.get(url)
-        movies = parse_data(response.text)
-        return movies
-    except:
-        return None"""
 
 
 def parse_data(html_page: str):
@@ -1496,28 +1487,28 @@ def main():
     start = time.time()
     number_threads = int(sys.argv[1])
 
-    # list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
-    # list_urls_genre_adventure = create_list_urls("adventure", get_urls_genre_adventure())
-    # list_urls_genre_animation = create_list_urls("animation", get_urls_genre_animation())
-    # list_urls_genre_biography = create_list_urls("biography", get_urls_genre_biography())
-    # list_urls_genre_comedy = create_list_urls("comedy", get_urls_genre_comedy())
-    # list_urls_genre_crime = create_list_urls("crime", get_urls_genre_crime())
-    # list_urls_genre_drama = create_list_urls("drama", get_urls_genre_drama())
-    # list_urls_genre_family = create_list_urls("family", get_urls_genre_family())
-    # list_urls_genre_fantasy = create_list_urls("fantasy", get_urls_genre_fantasy())
-    # list_urls_genre_film_noir = create_list_urls("film_noir", get_urls_genre_film_noir())
-    # list_urls_genre_history = create_list_urls("history", get_urls_genre_history())
-    # list_urls_genre_horror = create_list_urls("horror", get_urls_genre_horror())
-    # list_urls_genre_music = create_list_urls("music", get_urls_genre_music())
-    # list_urls_genre_musical = create_list_urls("musical", get_urls_genre_musical())
-    # list_urls_genre_mystery = create_list_urls("mystery", get_urls_genre_mystery())
-    # list_urls_genre_romance = create_list_urls("romance", get_urls_genre_romance())
-    # list_urls_genre_sci_fi = create_list_urls("sci_fi", get_urls_genre_sci_fi())
-    # list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())
-    # list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())
-    # list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
-    # list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
-    # list_urls_genre_western = create_list_urls("western", get_urls_genre_western())
+    """list_urls_genre_action = create_list_urls("action", get_urls_genre_action())
+    list_urls_genre_adventure = create_list_urls("adventure", get_urls_genre_adventure())
+    list_urls_genre_animation = create_list_urls("animation", get_urls_genre_animation())
+    list_urls_genre_biography = create_list_urls("biography", get_urls_genre_biography())
+    list_urls_genre_comedy = create_list_urls("comedy", get_urls_genre_comedy())
+    list_urls_genre_crime = create_list_urls("crime", get_urls_genre_crime())
+    list_urls_genre_drama = create_list_urls("drama", get_urls_genre_drama())
+    list_urls_genre_family = create_list_urls("family", get_urls_genre_family())
+    list_urls_genre_fantasy = create_list_urls("fantasy", get_urls_genre_fantasy())
+    list_urls_genre_film_noir = create_list_urls("film_noir", get_urls_genre_film_noir())
+    list_urls_genre_history = create_list_urls("history", get_urls_genre_history())
+    list_urls_genre_horror = create_list_urls("horror", get_urls_genre_horror())
+    list_urls_genre_music = create_list_urls("music", get_urls_genre_music())
+    list_urls_genre_musical = create_list_urls("musical", get_urls_genre_musical())
+    list_urls_genre_mystery = create_list_urls("mystery", get_urls_genre_mystery())
+    list_urls_genre_romance = create_list_urls("romance", get_urls_genre_romance())
+    list_urls_genre_sci_fi = create_list_urls("sci_fi", get_urls_genre_sci_fi())
+    list_urls_genre_sport = create_list_urls("sport", get_urls_genre_sport())
+    list_urls_genre_superhero = create_list_urls("superhero", get_urls_genre_superhero())
+    list_urls_genre_thriller = create_list_urls("thriller", get_urls_genre_thriller())
+    list_urls_genre_war = create_list_urls("war", get_urls_genre_war())
+    list_urls_genre_western = create_list_urls("western", get_urls_genre_western())"""
 
     list_all_urls = load_files()
     all_urls_file = open("all_urls_file.p", "wb")
@@ -1557,3 +1548,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

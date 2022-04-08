@@ -3,58 +3,62 @@ import time
 import re
 
 
-def data_cleaning(file: list) -> list:
-    print(file)
-    for i, v in enumerate(file):
-        try:
-            year = file[i]['year']
-            file[i].update({'year': int(year)})
-        except:
-            year = None
-            file[i].update({'year': year})
+##############################################################################################
+#   DATA CLEANING
+##############################################################################################
 
-    for i, v in enumerate(file):
-        runtime = file[i]['runtime']
-        runtime = re.findall("\d", runtime)
-        runtime = ''.join(runtime)
-        if runtime != '':
-            file[i].update({'runtime': int(runtime)})
-        else:
-            runtime = None
-            file[i].update({'runtime': runtime})
 
-    for i, v in enumerate(file):
-        try:
-            collection = file[i]['collection']
-            file[i].update({'collection': int(collection)})
-        except:
-            collection = None
-            file[i].update({'collection': collection})
+def convert_to_int(num) -> int:
+    try:
+        return int(num)
+    except:
+        return None
 
-    for i, v in enumerate(file):
-        try:
-            num_votes = file[i]['num_votes']
-            file[i].update({'num_votes': int(num_votes)})
-        except:
-            num_votes = None
-            file[i].update({'num_votes': num_votes})
 
-    for i, v in enumerate(file):
-        try:
-            imdb_rating = file[i]['imdb_rating']
-            file[i].update({'imdb_rating': float(imdb_rating)})
-        except:
-            imdb_rating = None
-            file[i].update({'imdb_rating': imdb_rating})
+def convert_to_float(number) -> int:
+    try:
+        return float(number)
+    except:
+        return None
 
-    for i, v in enumerate(file):
-        genre = file[i]['genre'][1:-1].upper()
-        genre = genre.split(', ')
-        file[i].update({'genre': genre})
+
+def clean_runtime(runtime) -> int:
+    runtime = re.findall("\d", runtime)
+    runtime = ''.join(runtime)
+    if runtime != '':
+        return runtime
+    else:
+        return None
+
+
+def clean_genre(genres: str) -> list:
+    genre = genres[1:-1].upper()
+    genre = genre.split(', ')
+
+    return genre
+
+
+##############################################################################################
+#   MAIN
+##############################################################################################
+
+
+def data_cleaning() -> list:
+    with open('movies.p', 'rb') as movies_file:
+        file = pickle.load(movies_file)
+    for i in file:
+        i['year'] = convert_to_int(i['year'])
+        i['runtime'] = clean_runtime(i['runtime'])
+        i['num_votes'] = convert_to_int(i['num_votes'])
+        i['collection'] = convert_to_int(i['collection'])
+        i['imdb_rating'] = convert_to_float(i['imdb_rating'])
+        i['genre'] = clean_genre(i['genre'])
 
     with open('movie_data_limited_all_updated.p', 'wb') as file_up:
         pickle.dump(file, file_up)
 
     return file
 
+
+data_cleaning()
 
